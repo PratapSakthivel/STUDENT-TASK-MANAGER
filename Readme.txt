@@ -50,4 +50,17 @@ Service
     ↓
 JPA Repository
     ↓
-SQL Database
+SQL Database## Running the Application
+
+            ### Prerequisites
+
+            - Java 17
+            - Maven
+            - MySQL
+
+            ### Database
+
+            Create the MySQL database:
+
+            ```sql
+            CREATE DATABASE student_task_manager;
