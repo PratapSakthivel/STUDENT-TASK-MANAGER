@@ -4,6 +4,7 @@ package student_task_manager.service;
 import java.util.*;
 import org.springframework.stereotype.Service;
 import student_task_manager.model.Task;
+import student_task_manager.model.TaskStatus;
 import student_task_manager.repository.TaskRepository;
 
 @Service
@@ -44,4 +45,11 @@ public class TaskService {
     public void  deleteTaskById (Long id){
          taskRepository.deleteById(id);
     }
+
+    public Task updateTaskStatus(Long id, TaskStatus status) {
+        Task task = getTaskById(id);
+        task.setStatus(status);
+        return taskRepository.save(task);
+    }
+
 }
