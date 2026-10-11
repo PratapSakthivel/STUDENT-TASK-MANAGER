@@ -5,4 +5,5 @@ import student_task_manager.model.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+
 }
