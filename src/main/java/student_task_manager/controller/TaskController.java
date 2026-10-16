@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/tasks")
+// while testing make sure u r using the the above url as a default one.
 public class TaskController {
 
     private final TaskService taskService;
