@@ -1,0 +1,930 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Task Manager</title>
+
+    <style>
+        /* ---------- General styles ---------- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --background: #f5f7fb;
+            --surface: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --success: #15803d;
+            --danger: #dc2626;
+            --warning: #b45309;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        button,
+        input,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible {
+            outline: 3px solid #c7d2fe;
+            outline-offset: 2px;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: auto;
+            padding: 28px 20px;
+        }
+
+        /* ---------- Header ---------- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: var(--primary);
+            color: white;
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .brand h1 {
+            font-size: 23px;
+        }
+
+        .brand p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .primary-button {
+            border: none;
+            border-radius: 9px;
+            padding: 11px 16px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .primary-button:hover {
+            background: var(--primary-dark);
+        }
+
+        /* ---------- Welcome section ---------- */
+        .welcome {
+            padding: 28px;
+            margin-bottom: 24px;
+            border-radius: 16px;
+            color: white;
+            background: linear-gradient(120deg, #4f46e5, #7c3aed);
+        }
+
+        .welcome h2 {
+            font-size: 27px;
+            margin-bottom: 6px;
+        }
+
+        .welcome p {
+            color: #e0e7ff;
+        }
+
+        /* ---------- Statistics ---------- */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .stat-number {
+            display: block;
+            margin-top: 8px;
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        /* ---------- Main layout ---------- */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            padding: 22px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            min-width: 0;
+        }
+
+        .panel h2 {
+            font-size: 19px;
+            margin-bottom: 18px;
+        }
+
+        /* ---------- Task form ---------- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: white;
+            color: var(--text);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            outline: 2px solid #e0e7ff;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .secondary-button {
+            padding: 11px 15px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            color: var(--text);
+        }
+
+        .secondary-button:hover {
+            background: #f9fafb;
+        }
+
+        /* ---------- Task list controls ---------- */
+        .task-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 140px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 13px;
+        }
+
+        .task-card {
+            padding: 17px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: white;
+        }
+
+        .task-card-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .task-card h3 {
+            font-size: 16px;
+            overflow-wrap: anywhere;
+        }
+
+        .task-description {
+            margin: 9px 0 13px;
+            color: var(--muted);
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 9px;
+            align-items: center;
+            flex-wrap: wrap;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: var(--success);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .small-button {
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: white;
+            font-size: 12px;
+        }
+
+        .small-button:hover {
+            background: #f3f4f6;
+        }
+
+        .delete-button {
+            color: var(--danger);
+        }
+
+        .empty-state {
+            padding: 35px 15px;
+            text-align: center;
+            color: var(--muted);
+            border: 1px dashed #d1d5db;
+            border-radius: 10px;
+        }
+
+        .message {
+            display: none;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.error {
+            color: #991b1b;
+            background: #fee2e2;
+        }
+
+        .message.info {
+            color: #1e40af;
+            background: #dbeafe;
+        }
+
+        .footer {
+            padding: 25px 0 5px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ---------- Responsive layout ---------- */
+        @media (max-width: 850px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 550px) {
+            .app {
+                padding: 18px 12px;
+            }
+
+            .header {
+                align-items: flex-start;
+            }
+
+            .brand h1 {
+                font-size: 19px;
+            }
+
+            .brand-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .header .primary-button {
+                padding: 9px 11px;
+                font-size: 13px;
+            }
+
+            .welcome {
+                padding: 22px;
+            }
+
+            .welcome h2 {
+                font-size: 22px;
+            }
+
+            .stats {
+                gap: 9px;
+            }
+
+            .stat-card {
+                padding: 14px 10px;
+            }
+
+            .stat-number {
+                font-size: 24px;
+            }
+
+            .stat-label {
+                font-size: 12px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon" aria-hidden="true">✓</div>
+            <div>
+                <h1>Student Task Manager</h1>
+                <p>Organize your work. Reach your goals.</p>
+            </div>
+        </div>
+
+        <button class="primary-button" id="newTaskButton" type="button">
+            + New Task
+        </button>
+    </header>
+
+    <section class="welcome">
+        <h2>Stay focused, stay organized!</h2>
+        <p>Keep track of your assignments, deadlines, and progress in one place.</p>
+    </section>
+
+    <section class="stats" aria-label="Task statistics">
+        <article class="stat-card">
+            <span class="stat-label">Total Tasks</span>
+            <strong class="stat-number" id="totalCount">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-label">Pending Tasks</span>
+            <strong class="stat-number" id="pendingCount">0</strong>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-label">Completed Tasks</span>
+            <strong class="stat-number" id="completedCount">0</strong>
+        </article>
+    </section>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+
+    <main class="content-grid">
+
+        <section class="panel" id="formPanel">
+            <h2 id="formHeading">Create a Task</h2>
+
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+
+                <div class="form-group">
+                    <label for="title">Task Title *</label>
+                    <input
+                            type="text"
+                            id="title"
+                            maxlength="200"
+                            placeholder="e.g. Complete Java assignment"
+                            required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea
+                            id="description"
+                            placeholder="Add details about your task"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline">Deadline</label>
+                    <input type="datetime-local" id="deadline">
+                </div>
+
+                <div class="form-actions">
+                    <button class="primary-button" type="submit" id="saveButton">
+                        Create Task
+                    </button>
+
+                    <button
+                            class="secondary-button"
+                            type="button"
+                            id="cancelButton"
+                            hidden>
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Your Tasks</h2>
+
+            <div class="task-toolbar">
+                <input
+                        class="search-input"
+                        id="searchInput"
+                        type="search"
+                        placeholder="Search tasks..."
+                        aria-label="Search tasks">
+
+                <select
+                        class="filter-select"
+                        id="statusFilter"
+                        aria-label="Filter tasks by status">
+                    <option value="ALL">All Tasks</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+            </div>
+
+            <div id="taskList" class="task-list">
+                <div class="empty-state">Loading tasks...</div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        Student Task Manager · Learn, plan, and accomplish.
+    </footer>
+</div>
+
+<script>
+    /*
+     * API integration
+     *
+     * This frontend expects the Spring Boot API at /api/tasks.
+     * The HTML file should be served by the same Spring Boot app.
+     */
+
+    const API_URL = "/api/tasks";
+
+    const taskForm = document.getElementById("taskForm");
+    const taskIdInput = document.getElementById("taskId");
+    const titleInput = document.getElementById("title");
+    const descriptionInput = document.getElementById("description");
+    const deadlineInput = document.getElementById("deadline");
+    const taskList = document.getElementById("taskList");
+    const searchInput = document.getElementById("searchInput");
+    const statusFilter = document.getElementById("statusFilter");
+    const messageBox = document.getElementById("message");
+
+    let tasks = [];
+    let messageTimer;
+
+    function showMessage(message, type = "info") {
+        clearTimeout(messageTimer);
+
+        messageBox.textContent = message;
+        messageBox.className = "message show " + type;
+
+        messageTimer = setTimeout(() => {
+            messageBox.className = "message";
+        }, 5000);
+    }
+
+    async function apiRequest(url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...options.headers
+            }
+        });
+
+        if (!response.ok) {
+            const details = await response.text();
+            throw new Error(
+                details || `Request failed with status ${response.status}`
+            );
+        }
+
+        if (response.status === 204) {
+            return null;
+        }
+
+        const text = await response.text();
+        return text ? JSON.parse(text) : null;
+    }
+
+    function updateStatistics() {
+        document.getElementById("totalCount").textContent = tasks.length;
+
+        document.getElementById("pendingCount").textContent =
+            tasks.filter(task => task.status === "PENDING").length;
+
+        document.getElementById("completedCount").textContent =
+            tasks.filter(task => task.status === "COMPLETED").length;
+    }
+
+    function formatDeadline(deadline) {
+        if (!deadline) {
+            return "No deadline";
+        }
+
+        const date = new Date(deadline);
+
+        if (Number.isNaN(date.getTime())) {
+            return "Invalid deadline";
+        }
+
+        return date.toLocaleString();
+    }
+
+    function createElement(tag, className, text) {
+        const element = document.createElement(tag);
+
+        if (className) {
+            element.className = className;
+        }
+
+        if (text !== undefined) {
+            element.textContent = text;
+        }
+
+        return element;
+    }
+
+    function createActionButton(text, className, action) {
+        const button = createElement("button", className, text);
+        button.type = "button";
+        button.addEventListener("click", action);
+        return button;
+    }
+
+    function renderTasks() {
+        updateStatistics();
+        taskList.replaceChildren();
+
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const selectedStatus = statusFilter.value;
+
+        const filteredTasks = tasks.filter(task => {
+            const matchesSearch =
+                (task.title || "").toLowerCase().includes(searchTerm) ||
+                (task.description || "").toLowerCase().includes(searchTerm);
+
+            const matchesStatus =
+                selectedStatus === "ALL" ||
+                task.status === selectedStatus;
+
+            return matchesSearch && matchesStatus;
+        });
+
+        if (filteredTasks.length === 0) {
+            const emptyMessage = tasks.length === 0
+                ? "No tasks yet. Create your first task!"
+                : "No tasks match your search or filter.";
+
+            taskList.appendChild(
+                createElement("div", "empty-state", emptyMessage)
+            );
+
+            return;
+        }
+
+        filteredTasks.forEach(task => {
+            const card = createElement("article", "task-card");
+
+            const top = createElement("div", "task-card-top");
+            const title = createElement("h3", "", task.title || "Untitled task");
+
+            const statusClass = task.status === "COMPLETED"
+                ? "status status-completed"
+                : "status status-pending";
+
+            const status = createElement(
+                "span",
+                statusClass,
+                task.status === "COMPLETED" ? "Completed" : "Pending"
+            );
+
+            top.append(title, status);
+            card.appendChild(top);
+
+            if (task.description) {
+                card.appendChild(
+                    createElement("p", "task-description", task.description)
+                );
+            }
+
+            const meta = createElement("div", "task-meta");
+            meta.appendChild(
+                createElement("span", "", "Deadline: " + formatDeadline(task.deadline))
+            );
+
+            card.appendChild(meta);
+
+            const actions = createElement("div", "task-actions");
+
+            actions.appendChild(
+                createActionButton("Edit", "small-button", () => editTask(task))
+            );
+
+            if (task.status === "PENDING") {
+                actions.appendChild(
+                    createActionButton("Mark Completed", "small-button", () =>
+                        changeStatus(task, "COMPLETED")
+                    )
+                );
+            } else {
+                actions.appendChild(
+                    createActionButton("Mark Pending", "small-button", () =>
+                        changeStatus(task, "PENDING")
+                    )
+                );
+            }
+
+            actions.appendChild(
+                createActionButton("Delete", "small-button delete-button", () =>
+                    deleteTask(task)
+                )
+            );
+
+            card.appendChild(actions);
+            taskList.appendChild(card);
+        });
+    }
+
+    async function loadTasks() {
+        taskList.replaceChildren(
+            createElement("div", "empty-state", "Loading tasks...")
+        );
+
+        try {
+            const result = await apiRequest(API_URL);
+
+            if (!Array.isArray(result)) {
+                throw new Error("The task API did not return a task list.");
+            }
+
+            tasks = result;
+            renderTasks();
+        } catch (error) {
+            taskList.replaceChildren(
+                createElement(
+                    "div",
+                    "empty-state",
+                    "Could not load tasks. Check that Spring Boot is running and the API is available."
+                )
+            );
+
+            showMessage(error.message, "error");
+        }
+    }
+
+    function resetForm() {
+        taskForm.reset();
+        taskIdInput.value = "";
+        document.getElementById("formHeading").textContent = "Create a Task";
+        document.getElementById("saveButton").textContent = "Create Task";
+        document.getElementById("cancelButton").hidden = true;
+    }
+
+    function editTask(task) {
+        taskIdInput.value = task.id;
+        titleInput.value = task.title || "";
+        descriptionInput.value = task.description || "";
+
+        if (task.deadline) {
+            // Convert a local or ISO date to the format expected by datetime-local.
+            const date = new Date(task.deadline);
+            const localDate = new Date(
+                date.getTime() - date.getTimezoneOffset() * 60000
+            );
+
+            deadlineInput.value = localDate.toISOString().slice(0, 16);
+        } else {
+            deadlineInput.value = "";
+        }
+
+        document.getElementById("formHeading").textContent = "Edit Task";
+        document.getElementById("saveButton").textContent = "Save Changes";
+        document.getElementById("cancelButton").hidden = false;
+
+        document.getElementById("formPanel").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+        titleInput.focus();
+    }
+
+    taskForm.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        const id = taskIdInput.value;
+
+        const task = {
+            title: titleInput.value.trim(),
+            description: descriptionInput.value.trim(),
+            deadline: deadlineInput.value
+                ? new Date(deadlineInput.value).toISOString()
+                : null
+        };
+
+        if (!task.title) {
+            showMessage("Please enter a task title.", "error");
+            titleInput.focus();
+            return;
+        }
+
+        try {
+            if (id) {
+                const existingTask = tasks.find(
+                    item => String(item.id) === String(id)
+                );
+
+                task.status = existingTask
+                    ? existingTask.status
+                    : "PENDING";
+
+                await apiRequest(`${API_URL}/${encodeURIComponent(id)}`, {
+                    method: "PUT",
+                    body: JSON.stringify(task)
+                });
+
+                showMessage("Task updated successfully.");
+            } else {
+                task.status = "PENDING";
+
+                await apiRequest(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify(task)
+                });
+
+                showMessage("Task created successfully.");
+            }
+
+            resetForm();
+            await loadTasks();
+        } catch (error) {
+            showMessage("Could not save task: " + error.message, "error");
+        }
+    });
+
+    async function changeStatus(task, status) {
+        try {
+            await apiRequest(
+                `${API_URL}/${encodeURIComponent(task.id)}/status`,
+                {
+                    method: "PATCH",
+                    body: JSON.stringify({ status })
+                }
+            );
+
+            showMessage("Task status updated.");
+            await loadTasks();
+        } catch (error) {
+            showMessage(
+                "Could not update task status: " + error.message,
+                "error"
+            );
+        }
+    }
+
+    async function deleteTask(task) {
+        const confirmed = window.confirm(
+            `Are you sure you want to delete "${task.title}"?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            await apiRequest(
+                `${API_URL}/${encodeURIComponent(task.id)}`,
+                { method: "DELETE" }
+            );
+
+            if (String(taskIdInput.value) === String(task.id)) {
+                resetForm();
+            }
+
+            showMessage("Task deleted successfully.");
+            await loadTasks();
+        } catch (error) {
+            showMessage("Could not delete task: " + error.message, "error");
+        }
+    }
+
+    document.getElementById("cancelButton").addEventListener("click", resetForm);
+
+    document.getElementById("newTaskButton").addEventListener("click", () => {
+        resetForm();
+
+        document.getElementById("formPanel").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+        titleInput.focus();
+    });
+
+    searchInput.addEventListener("input", renderTasks);
+    statusFilter.addEventListener("change", renderTasks);
+
+    // Load tasks when the page opens.
+    loadTasks();
+</script>
+</body>
+</html>
